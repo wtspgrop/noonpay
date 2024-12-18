@@ -12,7 +12,7 @@ const StepperControl = ({ handleClick, currentStep, steps }) => {
         className={`amx-cp-btn amx-mr-secondary ${
           currentStep === 1 ? "opacity-50 cursor-not-allowed" : ""
         }`}
-        style={{ marginTop: "-50px" }} // Adjust margin as needed
+        style={{ marginTop: "-40px" }} // Adjust margin as needed
       >
         Back
       </button>
@@ -20,7 +20,7 @@ const StepperControl = ({ handleClick, currentStep, steps }) => {
       <button
         onClick={() => handleClick("next")}
         className="amx-cp-btn"
-        style={{ marginTop: "-50px" }} // Adjust margin as needed
+        style={{ marginTop: "-40px" }} // Adjust margin as needed
       >
         {currentStep === steps.length - 1 ? "Confirm" : "Next"}
       </button>

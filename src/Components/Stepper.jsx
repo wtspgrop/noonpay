@@ -107,7 +107,8 @@ const Stepper = ({ steps, currentStep }) => {
     <div
       className="mx-4 p-4 flex justify-between items-center"
       style={{
-        marginTop: "-30px", // Adjust this value as needed
+        marginTop: "-40px", // Adjust the top space
+        marginBottom: "20px", // Adjust the bottom space
       }}
     >
       {displaySteps}
